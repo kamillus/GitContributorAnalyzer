@@ -18,13 +18,16 @@ module GitCommitAnalysis
       log = @g.log(@log_count)
       log.each_with_index do |commit, index|
         break if index+1 == log.count
-        diff = log[index].gtree.diff log[index+1]
+        diff = do_diff(log, index)
 
         @author_stat_map[commit.author.email] ||= {}
         @author_stat_map[commit.author.email]["insertions"] ||= 0
         @author_stat_map[commit.author.email]["deletions"] ||= 0
-        @author_stat_map[commit.author.email]["insertions"] += diff.insertions
-        @author_stat_map[commit.author.email]["deletions"] += diff.deletions
+
+        insertions, deletions = get_insertions_and_deletions(diff)
+
+        @author_stat_map[commit.author.email]["insertions"] += insertions
+        @author_stat_map[commit.author.email]["deletions"] += deletions
 
         (diff).each do |diff_file|
           @author_file_map[commit.author.email] ||= []
@@ -37,7 +40,6 @@ module GitCommitAnalysis
 
           @file_author_map[diff_file.path][commit.author.email]["diff_score"] ||= 0
           @file_author_map[diff_file.path][commit.author.email]["diff_score"] += diff_score(diff_file)
-          #binding.pry if commit.author.email == "ted.yang@clio.com"
 
           @analyzed_files += 1
         end
@@ -49,6 +51,14 @@ module GitCommitAnalysis
     end
 
     private
+
+    def get_insertions_and_deletions(diff)
+      return diff.insertions, diff.deletions
+    end
+
+    def do_diff(log, index)
+      log[index].gtree.diff log[index+1]
+    end
 
     def diff_score(diff_file)
       #super non-scientific way of scoring changes..
