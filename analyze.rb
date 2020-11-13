@@ -42,3 +42,8 @@ puts "================================================="
 analysis.file_path_heatmap.select {|k, v| v > 1}.sort_by {|k, v| -v}.each do |item|
   puts "#{item[0]} => Commits: #{item[1]}"
 end
+
+puts
+puts "Percent code contributions by author vs others"
+puts "================================================="
+puts analysis.author_code_spread

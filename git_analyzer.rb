@@ -2,7 +2,7 @@ require 'pathname'
 
 module GitCommitAnalysis
   class GitAnalyzer
-    attr_reader :files_with_limited_contributions_by_others, :file_path_heatmap
+    attr_reader :files_with_limited_contributions_by_others, :file_path_heatmap, :author_code_spread
 
     LIMITED_CONTRIBUTION_PERCENT = 15/100
 
@@ -13,13 +13,14 @@ module GitCommitAnalysis
       @files_with_limited_contributions_by_others ||= {}
       @file_path_heatmap ||= {}
       @author_contributions ||= {}
+      @author_code_spread ||= {}
     end
 
     def process
       process_files_with_limited_contributions_by_others
       process_file_path_heatmap
       process_author_contributions
-      process_score
+      process_author_code_spread
 
       self
     end
@@ -60,19 +61,14 @@ module GitCommitAnalysis
         path = Pathname(file).each_filename.to_a
         path[0..-2].each_with_index do |_, index|
           path_key = path[0,index+1].join("/")
-          binding.pry if path_key.nil?
           @file_path_heatmap[path_key] ||= 0
           @file_path_heatmap[path_key] += 1
         end
       end
     end
 
-    def process_score
-
-    end
-
     def process_author_code_spread
-
+      @author_code_spread = @mapper.author_file_map[@author].count / @mapper.file_author_map.keys.count.to_f * 100
     end
 
   end
