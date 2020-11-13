@@ -56,7 +56,7 @@ module GitCommitAnalysis
     end
 
     def process_file_path_heatmap
-      @mapper.author_file_map[@author][0..-1].each do |file|
+      (@mapper.author_file_map[@author] || [])[0..-1].each do |file|
         path = Pathname(file).each_filename.to_a
         path[0..-2].each_with_index do |_, index|
           path_key = path[0,index+1].join("/")
