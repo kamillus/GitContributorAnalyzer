@@ -13,16 +13,18 @@ if repo_url.nil? || author.nil?
 end
 
 puts "Cloning repo.. "
+name = repo_url.split("/")[-1]
 g = nil
 begin
-  g = Git.clone(repo_url, "repo", :path => TEMP_REPO_PATH)
+  g = Git.clone(repo_url, name, :path => TEMP_REPO_PATH)
 rescue => e
   if e.message.include? "already exists and is not an empty directory"
     puts "Repo already exists.. continuing"
-    g = Git.open(TEMP_REPO_PATH + "/repo")
+    g = Git.open(TEMP_REPO_PATH + "/#{name}")
   end
 end
 
+puts "Starting analysis.. "
 mapper = GitCommitAnalysis::GitMapper.new(g, 500).analyze
 analysis = GitCommitAnalysis::GitAnalyzer.new(mapper, author).process
 
